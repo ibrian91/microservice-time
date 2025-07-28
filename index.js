@@ -42,17 +42,26 @@ app.get("/api/:date?", function (req, res) {
   let dateParam = req.params.date;
 
   if (!dateParam) {
+    // Parámetro vacío: devolver tiempo actual
     let now = new Date();
     res.json({ unix: now.getTime(), utc: now.toUTCString() });
   } else {
-    // Intentar analizar la fecha proporcionada
-    let date = new Date(dateParam);
-    if (date.getTime()) {
-      // Si la fecha es válida, devolverla en el formato solicitado
+    // Verificar si es un timestamp numérico
+    let timestamp = parseInt(dateParam, 10);
+    if (!isNaN(timestamp) && timestamp.toString() === dateParam) {
+      // Es un timestamp válido
+      let date = new Date(timestamp);
       res.json({ unix: date.getTime(), utc: date.toUTCString() });
     } else {
-      // Si la fecha es inválida, devolver un error
-      res.json({ error: "Invalid Date" });
+      // Intentar analizar como fecha string
+      let date = new Date(dateParam);
+      if (!isNaN(date.getTime())) {
+        // Si la fecha es válida, devolverla en el formato solicitado
+        res.json({ unix: date.getTime(), utc: date.toUTCString() });
+      } else {
+        // Si la fecha es inválida, devolver un error
+        res.json({ error: "Invalid Date" });
+      }
     }
   }
 });
